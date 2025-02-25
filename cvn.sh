@@ -131,10 +131,10 @@ download_with_dark() {
 
     mkdir -p "$DOWNLOAD_DIR"
 
-    repos=$(jq -r '.repos[] | select(.mode == "dark" or .mode == "all") | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
+    repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
     if [[ -z "$repos" ]]; then
-        echo "No repositories found in $CONFIG_FILE with dark mode."
+        echo "No repositories found in $CONFIG_FILE."
         exit 1
     fi
 
@@ -183,10 +183,10 @@ download_with_stab() {
 
     mkdir -p "$DOWNLOAD_DIR"
 
-    repos=$(jq -r '.repos[] | select(.mode == "stab" or .mode == "all") | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
+    repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
     if [[ -z "$repos" ]]; then
-        echo "No repositories found in $CONFIG_FILE with stab mode."
+        echo "No repositories found in $CONFIG_FILE."
         exit 1
     fi
 
@@ -312,3 +312,4 @@ case $1 in
         exit 1
         ;;
 esac
+
