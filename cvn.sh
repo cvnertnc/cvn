@@ -138,40 +138,35 @@ download_with_dark() {
         exit 1
     fi
 
-    echo "Select a repository to download:"
-    select repo in $repos; do
-        if [[ -n "$repo" ]]; then
-            owner=$(echo "$repo" | awk -F'/' '{print $1}')
-            repo_name=$(echo "$repo" | awk -F'/' '{print $2}')
+    for repo in $repos; do
+        owner=$(echo "$repo" | awk -F'/' '{print $1}')
+        repo_name=$(echo "$repo" | awk -F'/' '{print $2}')
 
-            branch=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .branch' "$CONFIG_FILE")
-            workflow=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .workflow' "$CONFIG_FILE")
+        branch=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .branch' "$CONFIG_FILE")
+        workflow=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .workflow' "$CONFIG_FILE")
 
-            break
+        nightly_url="https://nightly.link/$owner/$repo_name/workflows/$workflow/$branch"
+        echo "Created Nightly.link URL: $nightly_url"
+
+        echo "Available download links (only zip files) for $repo:"
+        mapfile -t download_links < <(lynx -listonly -dump "$nightly_url" | sed 's/^[[:space:]]*[0-9]\+\.\s*//' | grep -i '\.zip')
+
+        if [[ ${#download_links[@]} -eq 0 ]]; then
+            echo "No download link found for $repo."
+            continue
         fi
+
+        select download_url in "${download_links[@]}"; do
+            if [[ -n "$download_url" ]]; then
+                break
+            fi
+        done
+
+        echo "Selected link: $download_url"
+        echo "Downloading file to $DOWNLOAD_DIR..."
+        wget -O "$DOWNLOAD_DIR/${repo_name}_${workflow}.zip" "$download_url"
+        echo "File downloaded: $DOWNLOAD_DIR/${repo_name}_${workflow}.zip"
     done
-
-    nightly_url="https://nightly.link/$owner/$repo_name/workflows/$workflow/$branch"
-    echo "Created Nightly.link URL: $nightly_url"
-
-    echo "Available download links (only zip files):"
-    mapfile -t download_links < <(lynx -listonly -dump "$nightly_url" | sed 's/^[[:space:]]*[0-9]\+\.\s*//' | grep -i '\.zip')
-
-    if [[ ${#download_links[@]} -eq 0 ]]; then
-        echo "No download link found."
-        exit 1
-    fi
-
-    select download_url in "${download_links[@]}"; do
-        if [[ -n "$download_url" ]]; then
-            break
-        fi
-    done
-
-    echo "Selected link: $download_url"
-    echo "Downloading file to $DOWNLOAD_DIR..."
-    wget -O "$DOWNLOAD_DIR/${repo_name}_${workflow}.zip" "$download_url"
-    echo "File downloaded: $DOWNLOAD_DIR/${repo_name}_${workflow}.zip"
 }
 
 # Function to download repositories using stab.sh logic
@@ -190,29 +185,24 @@ download_with_stab() {
         exit 1
     fi
 
-    echo "Select a repository to download:"
-    select repo in $repos; do
-        if [[ -n "$repo" ]]; then
-            owner=$(echo "$repo" | awk -F'/' '{print $1}')
-            repo_name=$(echo "$repo" | awk -F'/' '{print $2}')
+    for repo in $repos; do
+        owner=$(echo "$repo" | awk -F'/' '{print $1}')
+        repo_name=$(echo "$repo" | awk -F'/' '{print $2}')
 
-            branch=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .branch' "$CONFIG_FILE")
+        branch=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .branch' "$CONFIG_FILE")
 
-            break
+        release_info=$(curl -s "https://api.github.com/repos/$owner/$repo_name/releases/latest")
+        asset_url=$(echo "$release_info" | jq -r '.assets[0].browser_download_url')
+
+        if [[ -z "$asset_url" ]] || [[ "$asset_url" == "null" ]]; then
+            echo "No release found or no asset available for $repo!"
+            continue
         fi
+
+        echo "Downloading: $asset_url"
+        wget -q --show-progress -O "$DOWNLOAD_DIR/${asset_url##*/}" "$asset_url"
+        echo "Download complete! File: $DOWNLOAD_DIR/${asset_url##*/}"
     done
-
-    release_info=$(curl -s "https://api.github.com/repos/$owner/$repo_name/releases/latest")
-    asset_url=$(echo "$release_info" | jq -r '.assets[0].browser_download_url')
-
-    if [[ -z "$asset_url" ]] || [[ "$asset_url" == "null" ]]; then
-        echo "No release found or no asset available!"
-        exit 1
-    fi
-
-    echo "Downloading: $asset_url"
-    wget -q --show-progress -O "$DOWNLOAD_DIR/${asset_url##*/}" "$asset_url"
-    echo "Download complete! File: $DOWNLOAD_DIR/${asset_url##*/}"
 }
 
 # Function to download repositories using all methods
