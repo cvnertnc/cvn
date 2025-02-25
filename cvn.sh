@@ -7,7 +7,7 @@ BASE_DIR="."
 
 # Function to display help information
 show_help() {
-    echo "Usage: $0 {-a|-d|-f|-h}"
+    echo "Usage: cvn {-a|-d|-f|-h}"
     echo
     echo "Commands:"
     echo "  -a, add       Add a repository to the configuration file."
@@ -17,11 +17,11 @@ show_help() {
     echo "  -h, help      Display this help message."
     echo
     echo "Examples:"
-    echo "  $0 -a                  Add a new repository."
-    echo "  $0 -d n                Download using dark.sh logic."
-    echo "  $0 -d r                Download using stab.sh logic."
-    echo "  $0 -d a                Download all repositories regardless of mode."
-    echo "  $0 -f /path/to/dir    Set the base directory to '/path/to/dir'."
+    echo "  cvn -a                  Add a new repository."
+    echo "  cvn -d n                Download using dark.sh logic."
+    echo "  cvn -d r                Download using stab.sh logic."
+    echo "  cvn -d a                Download all repositories regardless of mode."
+    echo "  cvn -f /path/to/dir    Set the base directory to '/path/to/dir'."
 }
 
 # Function to set the directory path
@@ -103,8 +103,8 @@ add_repo() {
         done
     fi
 
-    echo "Select the mode (dark/stab/all):"
-    select mode in dark stab all; do
+    echo "Select the mode (nightly/release/all):"
+    select mode in nightly release all; do
         if [[ -n "$mode" ]]; then
             break
         fi
@@ -239,7 +239,7 @@ download_all() {
         workflow=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .workflow' "$CONFIG_FILE")
         mode=$(jq -r --arg owner "$owner" --arg repo "$repo_name" '.repos[] | select(.owner == $owner and .repo == $repo) | .mode' "$CONFIG_FILE")
 
-        if [[ "$mode" == "dark" || "$mode" == "all" ]]; then
+        if [[ "$mode" == "nightly" || "$mode" == "all" ]]; then
             nightly_url="https://nightly.link/$owner/$repo_name/workflows/$workflow/$branch"
             echo "Created Nightly.link URL: $nightly_url"
 
@@ -261,7 +261,7 @@ download_all() {
             echo "Downloading file to $DOWNLOAD_DIR..."
             wget -O "$DOWNLOAD_DIR/${repo_name}_${workflow}.zip" "$download_url"
             echo "File downloaded: $DOWNLOAD_DIR/${repo_name}_${workflow}.zip"
-        elif [[ "$mode" == "stab" || "$mode" == "all" ]]; then
+        elif [[ "$mode" == "release" || "$mode" == "all" ]]; then
             release_info=$(curl -s "https://api.github.com/repos/$owner/$repo_name/releases/latest")
             asset_url=$(echo "$release_info" | jq -r '.assets[0].browser_download_url')
 
@@ -296,7 +296,7 @@ case $1 in
                 download_all
                 ;;
             *)
-                echo "Usage: $0 -d {n|r|a}"
+                echo "Usage: cvn -d {n|r|a}"
                 exit 1
                 ;;
         esac
