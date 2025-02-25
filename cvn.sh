@@ -7,21 +7,23 @@ BASE_DIR="."
 
 # Function to display help information
 show_help() {
-    echo "Usage: cvn {-a|-d|-f|-h}"
+    echo "- Usage: cvn {-a|-d|-f|-h}"
     echo
-    echo "Commands:"
-    echo "  -a, add       Add a repository to the configuration file."
-    echo "  -d, download   Download repositories."
-    echo "                Use '-d n' for dark.sh logic, '-d r' for stab.sh logic, and '-d a' for all."
-    echo "  -f, folder    Set the base directory for the configuration file and downloads."
-    echo "  -h, help      Display this help message."
+    echo "- Commands:"
+    echo "    -a, add       Add a repository to the configuration file."
+    echo "    -d, download   Download repositories."
+    echo "                  Use '-d n' for dark.sh logic, '-d r' for stab.sh logic, and '-d a' for all."
+    echo "    -f, folder    Set the base directory for the configuration file and downloads."
+    echo "    -h, help      Display this help message."
     echo
-    echo "Examples:"
-    echo "  cvn -a                  Add a new repository."
-    echo "  cvn -d n                Download using dark.sh logic."
-    echo "  cvn -d r                Download using stab.sh logic."
-    echo "  cvn -d a                Download all repositories regardless of mode."
-    echo "  cvn -f /path/to/dir    Set the base directory to '/path/to/dir'."
+    echo "- Examples:"
+    echo "    cvn -a                  Add a new repository."
+    echo "    cvn -d n                Download using dark.sh logic."
+    echo "    cvn -d r                Download using stab.sh logic."
+    echo "    cvn -d a                Download all repositories regardless of mode."
+    echo "    cvn -f /path/to/dir    Set the base directory to '/path/to/dir'."
+    echo
+    echo "- By CEHunter | Telegram @the_CEHunter | Github @cvnertnc"
 }
 
 # Function to set the directory path
