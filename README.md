@@ -11,8 +11,8 @@ Download and install the CVN tool for managing GitHub repositories. Works on bot
 - Dependencies: `jq`, `git`, `wget`, `lynx`.
 
 ## ⬇️ Download:
-- **Ubuntu**: [cvn-package-ubuntu.deb](https://github.com/cvnertnc/cvn/release/latest)
-- **Termux**: [cvn-package-termux.tar.gz](https://github.com/cvnertnc/cvn/release/latest)
+- **Ubuntu**: [cvn-package-ubuntu.deb](https://github.com/cvnertnc/cvn/releases/latest)
+- **Termux**: [cvn-package-termux.tar.gz](https://github.com/cvnertnc/cvn/releases/latest)
 
 ## 🛠️ Ubuntu Installation:
 1. **Install:**
