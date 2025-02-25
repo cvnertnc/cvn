@@ -20,7 +20,7 @@ show_help() {
     echo "  $0 -a                  Add a new repository."
     echo "  $0 -d n                Download using dark.sh logic."
     echo "  $0 -d r                Download using stab.sh logic."
-    echo "  $0 -d a                Download using all methods."
+    echo "  $0 -d a                Download all repositories regardless of mode."
     echo "  $0 -f /path/to/dir    Set the base directory to '/path/to/dir'."
 }
 
@@ -312,4 +312,3 @@ case $1 in
         exit 1
         ;;
 esac
-
