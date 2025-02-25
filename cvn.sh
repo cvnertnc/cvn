@@ -5,6 +5,24 @@ DOWNLOAD_DIR="downloads"
 PATH_FILE="path.json"
 BASE_DIR="."
 
+# Function to display help information
+show_help() {
+    echo "Usage: $0 {-a|-d|-f|-h}"
+    echo
+    echo "Commands:"
+    echo "  -a, add       Add a repository to the configuration file."
+    echo "  -d, download  Download repositories."
+    echo "                Use '-d n' for dark.sh logic and '-d r' for stab.sh logic."
+    echo "  -f, folder    Set the base directory for the configuration file and downloads."
+    echo "  -h, help      Display this help message."
+    echo
+    echo "Examples:"
+    echo "  $0 -a                  Add a new repository."
+    echo "  $0 -d n                Download using dark.sh logic."
+    echo "  $0 -d r                Download using stab.sh logic."
+    echo "  $0 -f /path/to/dir    Set the base directory to '/path/to/dir'."
+}
+
 # Function to set the directory path
 set_directory() {
     if [[ -n "$1" ]]; then
@@ -213,8 +231,11 @@ case $1 in
     -f|folder)
         set_directory "$2"
         ;;
+    -h|help)
+        show_help
+        ;;
     *)
-        echo "Usage: $0 {-a|-d|-f}"
+        show_help
         exit 1
         ;;
 esac
