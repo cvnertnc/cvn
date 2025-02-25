@@ -2,6 +2,7 @@
 
 CONFIG_FILE="config.json"
 DOWNLOAD_DIR="downloads"
+BASE_DIR="."
 
 # Function to set the directory path
 set_directory() {
