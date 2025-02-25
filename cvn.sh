@@ -12,7 +12,7 @@ show_help() {
     echo "Commands:"
     echo "  -a, add       Add a repository to the configuration file."
     echo "  -d, download  Download repositories."
-    echo "                Use '-d n' for dark.sh logic and '-d r' for stab.sh logic."
+    echo "                Use '-d n' for dark.sh logic, '-d r' for stab.sh logic, and '-d a' for all."
     echo "  -f, folder    Set the base directory for the configuration file and downloads."
     echo "  -h, help      Display this help message."
     echo
@@ -20,6 +20,7 @@ show_help() {
     echo "  $0 -a                  Add a new repository."
     echo "  $0 -d n                Download using dark.sh logic."
     echo "  $0 -d r                Download using stab.sh logic."
+    echo "  $0 -d a                Download using all methods."
     echo "  $0 -f /path/to/dir    Set the base directory to '/path/to/dir'."
 }
 
@@ -102,8 +103,15 @@ add_repo() {
         done
     fi
 
-    repo_info=$(jq -n --arg owner "$owner" --arg repo "$repo" --arg branch "$branch" --arg workflow "$workflow" \
-        '{owner: $owner, repo: $repo, branch: $branch, workflow: $workflow}')
+    echo "Select the mode (dark/stab/all):"
+    select mode in dark stab all; do
+        if [[ -n "$mode" ]]; then
+            break
+        fi
+    done
+
+    repo_info=$(jq -n --arg owner "$owner" --arg repo "$repo" --arg branch "$branch" --arg workflow "$workflow" --arg mode "$mode" \
+        '{owner: $owner, repo: $repo, branch: $branch, workflow: $workflow, mode: $mode}')
 
     if [[ -f "$CONFIG_FILE" ]]; then
         jq --argjson new_repo "$repo_info" '.repos += [$new_repo]' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
@@ -123,10 +131,10 @@ download_with_dark() {
 
     mkdir -p "$DOWNLOAD_DIR"
 
-    repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
+    repos=$(jq -r '.repos[] | select(.mode == "dark" or .mode == "all") | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
     if [[ -z "$repos" ]]; then
-        echo "No repositories found in $CONFIG_FILE."
+        echo "No repositories found in $CONFIG_FILE with dark mode."
         exit 1
     fi
 
@@ -175,10 +183,10 @@ download_with_stab() {
 
     mkdir -p "$DOWNLOAD_DIR"
 
-    repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
+    repos=$(jq -r '.repos[] | select(.mode == "stab" or .mode == "all") | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
     if [[ -z "$repos" ]]; then
-        echo "No repositories found in $CONFIG_FILE."
+        echo "No repositories found in $CONFIG_FILE with stab mode."
         exit 1
     fi
 
@@ -207,6 +215,12 @@ download_with_stab() {
     echo "Download complete! File: $DOWNLOAD_DIR/${asset_url##*/}"
 }
 
+# Function to download repositories using all methods
+download_all() {
+    download_with_dark
+    download_with_stab
+}
+
 # Main script logic
 case $1 in
     -a|add)
@@ -222,8 +236,11 @@ case $1 in
             r)
                 download_with_stab
                 ;;
+            a)
+                download_all
+                ;;
             *)
-                echo "Usage: $0 -d {n|r}"
+                echo "Usage: $0 -d {n|r|a}"
                 exit 1
                 ;;
         esac
