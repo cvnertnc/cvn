@@ -1,6 +1,21 @@
 #!/bin/bash
 
 CONFIG_FILE="config.json"
+DOWNLOAD_DIR="downloads"
+
+# Function to set the directory path
+set_directory() {
+    if [[ -n "$1" ]]; then
+        BASE_DIR="$1"
+        CONFIG_FILE="$BASE_DIR/$CONFIG_FILE"
+        DOWNLOAD_DIR="$BASE_DIR/$DOWNLOAD_DIR"
+        mkdir -p "$DOWNLOAD_DIR"
+        echo "Directory set to: $BASE_DIR"
+    else
+        echo "Usage: cvn folder <path>"
+        exit 1
+    fi
+}
 
 # Required tools check
 if ! command -v jq &> /dev/null; then
@@ -66,7 +81,7 @@ add_repo() {
     echo "Repository added to $CONFIG_FILE"
 }
 
-# Function to download repositories using dark.sh
+# Function to download repositories using dark.sh logic
 download_with_dark() {
     if [[ ! -f "$CONFIG_FILE" ]]; then
         echo "No configuration file found."
@@ -111,12 +126,12 @@ download_with_dark() {
     done
 
     echo "Selected link: $download_url"
-    echo "Downloading file..."
-    wget -O "${repo_name}_${workflow}.zip" "$download_url"
-    echo "File downloaded: ${repo_name}_${workflow}.zip"
+    echo "Downloading file to $DOWNLOAD_DIR..."
+    wget -O "$DOWNLOAD_DIR/${repo_name}_${workflow}.zip" "$download_url"
+    echo "File downloaded: $DOWNLOAD_DIR/${repo_name}_${workflow}.zip"
 }
 
-# Function to download repositories using stab.sh
+# Function to download repositories using stab.sh logic
 download_with_stab() {
     if [[ ! -f "$CONFIG_FILE" ]]; then
         echo "No configuration file found."
@@ -151,31 +166,34 @@ download_with_stab() {
     fi
 
     echo "Downloading: $asset_url"
-    wget -q --show-progress -O "${asset_url##*/}" "$asset_url"
-    echo "Download complete! File: ${asset_url##*/}"
+    wget -q --show-progress -O "$DOWNLOAD_DIR/${asset_url##*/}" "$asset_url"
+    echo "Download complete! File: $DOWNLOAD_DIR/${asset_url##*/}"
 }
 
 # Main script logic
 case $1 in
-    -add)
+    add)
         add_repo
         ;;
-    -download)
+    download)
         case $2 in
-            -n)
+            n)
                 download_with_dark
                 ;;
-            -r)
+            r)
                 download_with_stab
                 ;;
             *)
-                echo "Usage: $0 -download {-n|-r}"
+                echo "Usage: $0 download {n|r}"
                 exit 1
                 ;;
         esac
         ;;
+    folder)
+        set_directory "$2"
+        ;;
     *)
-        echo "Usage: $0 {-add|-download}"
+        echo "Usage: $0 {add|download|folder}"
         exit 1
         ;;
 esac
