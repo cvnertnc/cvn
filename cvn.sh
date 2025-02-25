@@ -17,7 +17,7 @@ set_directory() {
         # Save the directory path to path.json
         echo '{"base_dir": "'"$BASE_DIR"'"}' | jq '.' > "$PATH_FILE"
     else
-        echo "Usage: cvn folder <path>"
+        echo "Usage: cvn -f <path>"
         exit 1
     fi
 }
@@ -191,11 +191,11 @@ download_with_stab() {
 
 # Main script logic
 case $1 in
-    add)
+    -a|add)
         load_directory
         add_repo
         ;;
-    download)
+    -d|download)
         load_directory
         case $2 in
             n)
@@ -205,16 +205,16 @@ case $1 in
                 download_with_stab
                 ;;
             *)
-                echo "Usage: $0 download {n|r}"
+                echo "Usage: $0 -d {n|r}"
                 exit 1
                 ;;
         esac
         ;;
-    folder)
+    -f|folder)
         set_directory "$2"
         ;;
     *)
-        echo "Usage: $0 {add|download|folder}"
+        echo "Usage: $0 {-a|-d|-f}"
         exit 1
         ;;
 esac
