@@ -88,6 +88,8 @@ download_with_dark() {
         exit 1
     fi
 
+    mkdir -p "$DOWNLOAD_DIR"
+
     repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
     if [[ -z "$repos" ]]; then
@@ -137,6 +139,8 @@ download_with_stab() {
         echo "No configuration file found."
         exit 1
     fi
+
+    mkdir -p "$DOWNLOAD_DIR"
 
     repos=$(jq -r '.repos[] | "\(.owner)/\(.repo)"' "$CONFIG_FILE")
 
