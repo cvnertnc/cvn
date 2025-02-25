@@ -2,7 +2,7 @@
 
 CONFIG_FILE="config.json"
 DOWNLOAD_DIR="downloads"
-PATCH_FILE="patch.json"
+PATH_FILE="path.json"
 BASE_DIR="."
 
 # Function to set the directory path
@@ -14,18 +14,18 @@ set_directory() {
         mkdir -p "$DOWNLOAD_DIR"
         echo "Directory set to: $BASE_DIR"
 
-        # Save the directory path to patch.json
-        echo '{"base_dir": "'"$BASE_DIR"'"}' | jq '.' > "$PATCH_FILE"
+        # Save the directory path to path.json
+        echo '{"base_dir": "'"$BASE_DIR"'"}' | jq '.' > "$PATH_FILE"
     else
         echo "Usage: cvn folder <path>"
         exit 1
     fi
 }
 
-# Function to load the directory path from patch.json
+# Function to load the directory path from path.json
 load_directory() {
-    if [[ -f "$PATCH_FILE" ]]; then
-        BASE_DIR=$(jq -r '.base_dir' "$PATCH_FILE")
+    if [[ -f "$PATH_FILE" ]]; then
+        BASE_DIR=$(jq -r '.base_dir' "$PATH_FILE")
         CONFIG_FILE="$BASE_DIR/$CONFIG_FILE"
         DOWNLOAD_DIR="$BASE_DIR/$DOWNLOAD_DIR"
         mkdir -p "$DOWNLOAD_DIR"
